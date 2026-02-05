@@ -46,7 +46,7 @@
   "bugs": {
     "url": "https://github.com/drop-africa/Drop.js-SDK/issues"
   },
-  "homepage": "https://github.com/drop-africa/Drop.js-SDK#readme",
+  "homepage": "https://drop.africa",
   "dependencies": {
     "qr-code-styling": "^1.9.2"
   }

@@ -402,7 +402,7 @@ onUnmounted(() => {
 
 ## Links
 
-- [Documentation](https://github.com/drop-africa/Drop.js-SDK)
+- [Documentation](https://github.com/drop-africa/Drop.js-SDK#readme)
 - [GitHub Repository](https://github.com/drop-africa/Drop.js-SDK)
 - [npm Package](https://www.npmjs.com/package/@drop-africa/drop-js)
 - [Issues](https://github.com/drop-africa/Drop.js-SDK/issues)
