@@ -5,6 +5,13 @@ node_modules/
 .vite/
 .tsbuildinfo
 
+# Build output
+dist/
+cache/
+
+# Assets (source files not needed in repo)
+*.png
+
 # Environment
 .env
 .env.local
@@ -30,3 +37,14 @@ coverage/
 
 # Package archives
 *.tgz
+
+test-app/
+
+# Build scripts for internal use (excluded from npm package via .npmignore)
+scripts/generate-logo.js
+
+# md files (documentation)
+*.md
+!README.md
+!CHANGELOG.md
+!RELEASE.md
