@@ -1,0 +1,173 @@
+name: Publish Drop.js SDK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 0.1.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: publish-sdk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build package
+        run: npm run build
+
+      - name: Verify bundle size
+        run: |
+          ESM_SIZE=$(wc -c < dist/drop.js)
+          UMD_SIZE=$(wc -c < dist/drop.umd.cjs)
+          MAX_SIZE=100000
+
+          echo "ESM bundle size: $ESM_SIZE bytes"
+          echo "UMD bundle size: $UMD_SIZE bytes"
+
+          if [ $ESM_SIZE -gt $MAX_SIZE ]; then
+            echo "Error: ESM bundle too large ($ESM_SIZE > $MAX_SIZE bytes)"
+            exit 1
+          fi
+
+          if [ $UMD_SIZE -gt $MAX_SIZE ]; then
+            echo "Error: UMD bundle too large ($UMD_SIZE > $MAX_SIZE bytes)"
+            exit 1
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  publish-to-npm:
+    name: Publish to npm
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Drop.js SDK v${{ steps.version.outputs.version }}
+          body: |
+            ## Drop.js SDK v${{ steps.version.outputs.version }}
+
+            See [CHANGELOG.md](https://github.com/drop-africa/Drop.js-SDK/blob/main/CHANGELOG.md) for details.
+
+            ### Installation
+
+            ```bash
+            npm install @drop-africa/drop-js@${{ steps.version.outputs.version }}
+            ```
+
+            ### CDN
+
+            ```html
+            <script src="https://cdn.drop.africa/sdk/${{ steps.version.outputs.version }}/drop.js"></script>
+            ```
+
+            ### Links
+
+            - [npm Package](https://www.npmjs.com/package/@drop-africa/drop-js/v/${{ steps.version.outputs.version }})
+            - [Documentation](https://github.com/drop-africa/Drop.js-SDK#readme)
+          draft: false
+          prerelease: false
+
+  deploy-to-cdn:
+    name: Deploy to CDN
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Deploying version: $VERSION"
+
+      - name: Deploy to CDN
+        run: |
+          chmod +x scripts/deploy-cdn.sh
+          ./scripts/deploy-cdn.sh ${{ steps.version.outputs.version }}
+        env:
+          CDN_UPLOAD_KEY: ${{ secrets.CDN_UPLOAD_KEY }}

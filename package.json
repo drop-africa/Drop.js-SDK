@@ -1,0 +1,53 @@
+{
+  "name": "@drop-africa/drop-js",
+  "version": "0.1.1",
+  "description": "Drop.js SDK - Embed payment QR codes and poll for payment status",
+  "type": "module",
+  "main": "./dist/drop.umd.cjs",
+  "module": "./dist/drop.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/drop.js",
+      "require": "./dist/drop.umd.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^27.0.0",
+    "jsdom": "^25.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.3.0",
+    "vitest": "^2.1.0"
+  },
+  "license": "MIT",
+  "keywords": [
+    "drop",
+    "payment",
+    "mobile-money",
+    "africa"
+  ],
+  "author": "Drop Africa",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/drop-africa/Drop.js-SDK"
+  },
+  "bugs": {
+    "url": "https://github.com/drop-africa/Drop.js-SDK/issues"
+  },
+  "homepage": "https://github.com/drop-africa/Drop.js-SDK#readme",
+  "dependencies": {
+    "qr-code-styling": "^1.9.2"
+  }
+}

@@ -1,0 +1,47 @@
+# Source files
+src/
+*.test.ts
+*.test.js
+
+# Development files
+test-app/
+node_modules/
+.vscode/
+.idea/
+
+# Configuration files
+vite.config.ts
+tsconfig.json
+tsconfig.node.json
+vitest.config.ts
+
+# Build artifacts
+.tsbuildinfo
+*.log
+*.tgz
+
+# Documentation (except README and CHANGELOG)
+VALIDATION.md
+RELEASE.md
+
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+scripts/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Coverage and test output
+coverage/
+.nyc_output/
